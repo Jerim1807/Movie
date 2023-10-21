@@ -2,12 +2,27 @@ const container = document.querySelector('.container');
 const seats = document.querySelectorAll('.row .seat:not(.occupied)');
 const count = document.getElementById('count');
 const total = document.getElementById('total');
-const movieSelect = document.getElementById('movie');
+const movieSelect = document.getElementById('selectedMovie');
 const confirmButton = document.querySelector('.confirm-button');
-// const showtimeSelect = document.getElementById('showtime');
 
 populateUI();
-let ticketPrice = +movieSelect.value;
+
+let ticketPrice1 = +localStorage.getItem('selectedMoviePrice');
+let ticketPrice2 = ticketPrice1+20;
+
+// Function to get URL parameters by name
+function getURLParameter(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+// Get the selected movie name from the URL
+const selectedMovie = getURLParameter("movie");
+
+// Update the selected movie element
+if (movieSelect) {
+  movieSelect.textContent = selectedMovie || "Unknown Movie";
+}
 
 // Save selected movie index and price
 function setMovieData(movieIndex, moviePrice) {
@@ -18,15 +33,27 @@ function setMovieData(movieIndex, moviePrice) {
 // Update total and count
 function updateSelectedCount() {
   const selectedSeats = document.querySelectorAll('.row .seat.selected');
+  const seatNo = [...selectedSeats].map((seat) => seat.getAttribute('name'));
+  const selectedSeatsAB = [...selectedSeats].filter(seat => {
+    const seatName = seat.getAttribute('name');
+    return seatName && (seatName.startsWith('A') || seatName.startsWith('B'));
+  });
 
-  const seatsIndex = [...selectedSeats].map((seat) => [...seats].indexOf(seat));
+  const selectedSeatsOther = [...selectedSeats].filter(seat => {
+    const seatName = seat.getAttribute('name');
+    return !seatName || (!seatName.startsWith('A') && !seatName.startsWith('B'));
+  });
 
-  localStorage.setItem('selectedSeats', JSON.stringify(seatsIndex));
+  const seatsIndexAB = selectedSeatsAB.map(seat => [...seats].indexOf(seat));
+  const seatsIndexOther = selectedSeatsOther.map(seat => [...seats].indexOf(seat));
 
-  const selectedSeatsCount = selectedSeats.length;
+  localStorage.setItem('selectedSeats', JSON.stringify([...seatsIndexAB, ...seatsIndexOther]));
 
-  count.innerText = selectedSeatsCount;
-  total.innerText = selectedSeatsCount * ticketPrice;
+  const selectedSeatsCountAB = selectedSeatsAB.length;
+  const selectedSeatsCountOther = selectedSeatsOther.length;
+
+  count.innerText = seatNo;
+  total.innerText = (selectedSeatsCountOther * ticketPrice1) + (selectedSeatsCountAB * ticketPrice2);
 }
 
 // Get data from local storage and populate UI
@@ -39,9 +66,7 @@ function populateUI() {
       }
     });
   }
-
   const selectedMovieIndex = localStorage.getItem('selectedMovieIndex');
-
   if (selectedMovieIndex !== null) {
     movieSelect.selectedIndex = selectedMovieIndex;
   }
@@ -49,28 +74,11 @@ function populateUI() {
 
 // Movie select event
 movieSelect.addEventListener('change', (e) => {
-  ticketPrice = +e.target.value;
-  setMovieData(e.target.selectedIndex, e.target.value);
+  const selectedMovieIndex = e.target.selectedIndex;
+  const selectedMoviePrice = e.target.value;
+  setMovieData(selectedMovieIndex, selectedMoviePrice);
   updateSelectedCount();
 });
-
-// Event listener for when the movie selection changes
-// movieSelect.addEventListener('change', (e) => {
-//   const selectedOption = e.target.options[e.target.selectedIndex];
-//   const showtimeData = selectedOption.getAttribute('data-showtimes');
-
-//   // Parse the showtimes from the data attribute
-//   const showtimes = showtimeData.split(',');
-
-//   // Populate the showtimeSelect with the showtimes for the selected movie
-//   showtimeSelect.innerHTML = '';
-//   showtimes.forEach(time => {
-//     const option = document.createElement('option');
-//     option.value = time;
-//     option.textContent = time;
-//     showtimeSelect.appendChild(option);
-//   });
-// });
 
 // Seat click event
 container.addEventListener('click', (e) => {
@@ -87,5 +95,19 @@ confirmButton.addEventListener('click', () => {
     seat.classList.remove('selected');
     seat.classList.add('occupied');
   });
+  // window.location.href = "";
   updateSelectedCount();
 });
+
+const ticketPriceE1 = document.getElementById('ticketPrice1');
+// Update the small element with the ticket price
+if (ticketPriceE1) {
+  ticketPriceE1.textContent = ticketPrice1;
+}
+const ticketPriceE2 = document.getElementById('ticketPrice2');
+// Update the small element with the ticket price
+if (ticketPriceE2) {
+  ticketPriceE2.textContent = ticketPrice2;
+}
+
+
