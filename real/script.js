@@ -44,10 +44,10 @@ function updateSelectedCount() {
     return !seatName || (!seatName.startsWith('A') && !seatName.startsWith('B'));
   });
 
-  const seatsIndexAB = selectedSeatsAB.map(seat => [...seats].indexOf(seat));
-  const seatsIndexOther = selectedSeatsOther.map(seat => [...seats].indexOf(seat));
+  // const seatsIndexAB = selectedSeatsAB.map(seat => [...seats].indexOf(seat));
+  // const seatsIndexOther = selectedSeatsOther.map(seat => [...seats].indexOf(seat));
 
-  localStorage.setItem('selectedSeats', JSON.stringify([...seatsIndexAB, ...seatsIndexOther]));
+  // localStorage.setItem('selectedSeats', JSON.stringify([...seatsIndexAB, ...seatsIndexOther]));
 
   const selectedSeatsCountAB = selectedSeatsAB.length;
   const selectedSeatsCountOther = selectedSeatsOther.length;
